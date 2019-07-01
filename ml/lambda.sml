@@ -45,61 +45,40 @@ fun beta (App (Abs(k, e), f)) = beta (subst (alpha e f) k f)
   | beta a = a
 
 
-(* fun eval_CBV (App (Abs (k, e), f)) = *)
-(*     let *)
-(*         val ev = eval_CBV e *)
-(*         val fv = eval_CBV f *)
-(*     in *)
-(*         eval_CBV (beta (App (ev, fv))) *)
-(*     end *)
-(*   | eval_CBV (App (e, f)) = App (eval_CBV e, eval_CBV f) *)
-(*   | eval_CBV (Abs (k, e)) = Abs (k, eval_CBV e) *)
-(*   | eval_CBV (Var k) = Var k *)
 
-(* fun eval_CBV (App (e, f)) = *)
-(*     ( *)
-(*       case e of *)
-(*         Abs _ => eval_CBV (beta (App (e, f))) *)
-(*        | _ => App (eval_CBV e, eval_CBV f) *)
-(*     ) *)
-(*   | eval_CBV (Abs (k, e)) = Abs (k, eval_CBV e) *)
-(*   | eval_CBV (Var k) = Var k *)
-
-
-(* closest yet? *)
-(* fun eval_CBV exp = *)
-(*     case exp of *)
-(*         App (e, f) => *)
-(*         let *)
-(*             val ev = eval_CBV e *)
-(*             val fv = eval_CBV f *)
-(*         in *)
-(*             case ev of *)
-(*                 Abs _ =>  eval_CBV (beta (App (ev, fv))) *)
-(*               | _ => App (ev, fv) *)
-(*         end *)
-(*       | Abs (v, e) => *)
-(*          Abs (v, eval_CBV e) *)
-(*       | Var k => *)
-(*          Var k *)
-
-fun eval_CBV exp =
-    (print ("evaluating " ^ (toString exp) ^ "\n"); 
-     case exp of
-         App (e, f) =>
-         let
-             val ev = eval_CBV e
-             val fv = eval_CBV f
-         in
-             case ev of
-                 Abs _ =>  eval_CBV (beta (App (ev, fv)))
-               | _ => App (ev, fv)
-         end
-       | Abs (v, e) =>
-         Abs (v, eval_CBV e)
-       | Var k =>
+fun eval exp =
+    case exp of
+        App (e, f) =>
+        let
+            val ev = eval e
+            val fv = eval f
+        in
+            case ev of
+                Abs _ =>  eval (beta (App (ev, fv)))
+              | _ => App (ev, fv)
+        end
+      | Abs (v, e) =>
+         Abs (v, eval e)
+      | Var k =>
          Var k
-    )
+
+(* fun eval_verbosely exp = *)
+(*     (print ("evaluating " ^ (toString exp) ^ "\n");  *)
+(*      case exp of *)
+(*          App (e, f) => *)
+(*          let *)
+(*              val ev = eval e *)
+(*              val fv = eval f *)
+(*          in *)
+(*              case ev of *)
+(*                  Abs _ =>  eval (beta (App (ev, fv))) *)
+(*                | _ => App (ev, fv) *)
+(*          end *)
+(*        | Abs (v, e) => *)
+(*          Abs (v, eval e) *)
+(*        | Var k => *)
+(*          Var k *)
+(*     ) *)
 
 
 (* (***********) *)
@@ -229,51 +208,51 @@ val DISJ = (ABS2 0 1 (APP2 (Var 0) TRUE (Var 1)))
 
                        
 
-(* val cbv0 = eval_CBV ( APP (ABS 0 (Var 0)) (Var 0)) *)
-(* val cbv1 = eval_CBV ( APP (ABS 0 (APP (Var 0) (Var 1))) (ABS 0 (Var 0))) *)
-(* val cbv2 = eval_CBV (ABS 0 (APP (Var 0) (Var 1))) *)
-(* val cbv3 = eval_CBV (APP (Var 0) (Var 1)) *)
-(* val cbv4 = eval_CBV (ABS 0 (APP (ABS 3 (Var 3)) (Var 0))) *)
-(* val cbv5 = eval_CBV (ABS2 3 4 (APP (ABS 3 (Var 3)) (APP (Var 3) (Var 4)))) *)
+(* val cbv0 = eval ( APP (ABS 0 (Var 0)) (Var 0)) *)
+(* val cbv1 = eval ( APP (ABS 0 (APP (Var 0) (Var 1))) (ABS 0 (Var 0))) *)
+(* val cbv2 = eval (ABS 0 (APP (Var 0) (Var 1))) *)
+(* val cbv3 = eval (APP (Var 0) (Var 1)) *)
+(* val cbv4 = eval (ABS 0 (APP (ABS 3 (Var 3)) (Var 0))) *)
+(* val cbv5 = eval (ABS2 3 4 (APP (ABS 3 (Var 3)) (APP (Var 3) (Var 4)))) *)
 
 
 (* (* the conditional applies its first arg to its second and third args *) *)
 
-(* val FIRST_0_1 = eval_CBV (APP2 FIRST (Var 0) (Var 1)) *)
-(* val SECOND_0_1 = eval_CBV (APP2 SECOND (Var 0) (Var 1)) *)
+(* val FIRST_0_1 = eval (APP2 FIRST (Var 0) (Var 1)) *)
+(* val SECOND_0_1 = eval (APP2 SECOND (Var 0) (Var 1)) *)
 
 
-val CBV_COND_TRUE_0_1 = eval_CBV (APP3 COND TRUE (Var 0) (Var 1))
-val CBV_COND_FALSE_0_1 = eval_CBV (APP3 COND FALSE (Var 0) (Var 1))
+val CBV_COND_TRUE_0_1 = eval (APP3 COND TRUE (Var 0) (Var 1))
+val CBV_COND_FALSE_0_1 = eval (APP3 COND FALSE (Var 0) (Var 1))
 
 
 (* val NEG = Abs(0, (APP2 (Var 0) FALSE TRUE)) *)
 
-(* (* val REV_TRUE = eval_CBV  (ABS2 1 2 (APP2 TRUE (Var 2) (Var 1))) *) *)
-(* (* val REV_FALSE = eval_CBV (ABS2 1 2 (APP2 FALSE (Var 2) (Var 1))) *) *)
+(* (* val REV_TRUE = eval  (ABS2 1 2 (APP2 TRUE (Var 2) (Var 1))) *) *)
+(* (* val REV_FALSE = eval (ABS2 1 2 (APP2 FALSE (Var 2) (Var 1))) *) *)
 
-val CBV_NEG_TRUE = eval_CBV (APP NEG TRUE)
-val CBV_NEG_FALSE = eval_CBV (APP NEG FALSE)
+val CBV_NEG_TRUE = eval (APP NEG TRUE)
+val CBV_NEG_FALSE = eval (APP NEG FALSE)
 
-(* (* val REV_TRUE_0_1 = eval_CBV (APP2 (ABS 1 (ABS 2 (APP (APP TRUE (Var 2)) (Var 1)))) (Var 0)) (Var 1) *) *)
+(* (* val REV_TRUE_0_1 = eval (APP2 (ABS 1 (ABS 2 (APP (APP TRUE (Var 2)) (Var 1)))) (Var 0)) (Var 1) *) *)
 
 (* (* neg v = lambda 0 1 v rev 0 1 *) *)
 
-val CBV_CONJ_TRUE_TRUE = eval_CBV (APP2 CONJ TRUE TRUE)
-val CBV_CONJ_TRUE_FALSE = eval_CBV (APP2 CONJ TRUE FALSE)
-val CBV_CONJ_FALSE_TRUE = eval_CBV (APP2 CONJ FALSE TRUE)
-val CBV_CONJ_FALSE_FALSE = eval_CBV (APP2 CONJ FALSE FALSE)
+val CBV_CONJ_TRUE_TRUE = eval (APP2 CONJ TRUE TRUE)
+val CBV_CONJ_TRUE_FALSE = eval (APP2 CONJ TRUE FALSE)
+val CBV_CONJ_FALSE_TRUE = eval (APP2 CONJ FALSE TRUE)
+val CBV_CONJ_FALSE_FALSE = eval (APP2 CONJ FALSE FALSE)
 
-val CBV_DISJ_TRUE_TRUE = eval_CBV (APP2 DISJ TRUE TRUE)
-val CBV_DISJ_TRUE_FALSE = eval_CBV (APP2 DISJ TRUE FALSE)
-val CBV_DISJ_FALSE_TRUE = eval_CBV (APP2 DISJ FALSE TRUE)
-val CBV_DISJ_FALSE_FALSE = eval_CBV (APP2 DISJ FALSE FALSE)
+val CBV_DISJ_TRUE_TRUE = eval (APP2 DISJ TRUE TRUE)
+val CBV_DISJ_TRUE_FALSE = eval (APP2 DISJ TRUE FALSE)
+val CBV_DISJ_FALSE_TRUE = eval (APP2 DISJ FALSE TRUE)
+val CBV_DISJ_FALSE_FALSE = eval (APP2 DISJ FALSE FALSE)
 
 val CBV_DISJ_DUAL = ABS2 0 1 (APP NEG (APP2 DISJ (APP NEG (Var 0)) (APP NEG (Var 1))))
-val CBV_DISJ_DUAL_TRUE_TRUE = eval_CBV (APP2 CBV_DISJ_DUAL TRUE TRUE)
-val CBV_DISJ_DUAL_TRUE_FALSE = eval_CBV (APP2 CBV_DISJ_DUAL TRUE FALSE)
-val CBV_DISJ_DUAL_FALSE_TRUE = eval_CBV (APP2 CBV_DISJ_DUAL FALSE TRUE)
-val CBV_DISJ_DUAL_FALSE_FALSE = eval_CBV (APP2 CBV_DISJ_DUAL FALSE FALSE)
+val CBV_DISJ_DUAL_TRUE_TRUE = eval (APP2 CBV_DISJ_DUAL TRUE TRUE)
+val CBV_DISJ_DUAL_TRUE_FALSE = eval (APP2 CBV_DISJ_DUAL TRUE FALSE)
+val CBV_DISJ_DUAL_FALSE_TRUE = eval (APP2 CBV_DISJ_DUAL FALSE TRUE)
+val CBV_DISJ_DUAL_FALSE_FALSE = eval (APP2 CBV_DISJ_DUAL FALSE FALSE)
 (* lists *)
 
 val CONS = ABS2 1 2 (ABS 0 (APP2 (Var 0) (Var 1) (Var 2)))
@@ -285,8 +264,8 @@ val TAIL = ABS 0 (APP (Var 0) FALSE)
 val ISEMPTY = ABS 0 (APP (Var 0) (ABS2 1 2 FALSE))
 val NIL = ABS 0 TRUE
 
-val IS_EMPTY_NIL = eval_CBV (APP ISEMPTY NIL)
-val IS_EMPTY_CONS_0_NIL = eval_CBV (APP ISEMPTY (APP2 CONS (Var 0) NIL))
+val IS_EMPTY_NIL = eval (APP ISEMPTY NIL)
+val IS_EMPTY_CONS_0_NIL = eval (APP ISEMPTY (APP2 CONS (Var 0) NIL))
 
 (* church numerals *)
 
@@ -297,23 +276,53 @@ val IS_EMPTY_CONS_0_NIL = eval_CBV (APP ISEMPTY (APP2 CONS (Var 0) NIL))
 val ZERO = ABS2 0 1 (Var 1)
 val ONE = ABS2 0 1 (APP (Var 0) (Var 1))
 val TWO = ABS2 0 1 (APP (Var 0) (APP (Var 0) (Var 1)))
+val THREE = ABS2 0 1 (APP (Var 0)(APP (Var 0) (APP (Var 0) (Var 1))))
 (* want ISZERO to return result of applying its argument to X, Y *)
 (* applying ZERO to X, Y returns Y, so we should pick Y=TRUE *)
 (* applying nonzero number to X, Y returns the result of some application of X, so we should pick X = lambda x : FALSE *)
 
 val ISZERO = ABS 0 (APP2 (Var 0) (ABS 1 FALSE) TRUE)
 
-val ZEROISZERO = eval_CBV (APP ISZERO ZERO)
-val ONEISZERO = eval_CBV (APP ISZERO ONE)
-val TWOISZERO = eval_CBV (APP ISZERO TWO)
+val ZEROISZERO = eval (APP ISZERO ZERO)
+val ONEISZERO = eval (APP ISZERO ONE)
+val TWOISZERO = eval (APP ISZERO TWO)
 
 (* succ lambda x,y : xxxy = lambda x, y : xxxxy *)
 (* succ f = lambda x, y : x(f(x,y)) *)
 (* succ = lambda f : lambda x, y : x(f(x,y)) *)
 val SUCC = ABS 0 (ABS2 1 2 (APP2 (Var 0) (Var 1) (APP (Var 1) (Var 2))))
-val SUCC_ZERO = eval_CBV (APP SUCC ZERO)
-
-(* val SUCC1 = ABS 0 (ABS2 1 2 (APP (Var 1) (APP2 (Var 0) (Var 1) (Var 2)) )) *)
-(* val SUCC1_ZERO = eval_CBV (APP SUCC1 ZERO) *)
+val SUCC_ZERO = eval (APP SUCC ZERO)
 
 
+val f = ABS 0 (APP2 CONS (APP TAIL (Var 0)) (APP SUCC (APP TAIL (Var 0))))
+val pc0 = APP2 CONS ZERO ZERO
+val PRED = ABS 0 (APP HEAD (APP2 (Var 0) f pc0))
+
+val pred_succ_zero = eval (APP PRED (APP SUCC ZERO))
+val pred_three = eval (APP PRED THREE)
+
+val D = (ABS 1 (APP2 (Var 0) (Var 1) (Var 1)))
+val Y = (ABS 0 (APP D D))
+
+            (* lambda F *)
+            (* ( *)
+            (*   lambda x y (APP *)
+            (*                   (ISZERO x) *)
+            (*                   x *)
+            (*                   (APP SUCC (APP2 F *)
+            (*                                   (Var 0) *)
+            (*                                   (APP PRED (Var 1)))) *)
+            (*              ) *)
+            (* ) *)
+
+val REC_FOR_ADD = ABS 2 (
+        ABS2 0 1 (
+            APP2 (APP ISZERO (Var 1))
+                 (Var 0)
+                 (APP SUCC (APP2 (Var 2)
+                                 (Var 0)
+                                 (APP PRED (Var 1))))))
+
+val ADD = APP Y REC_FOR_ADD
+
+val ONE_PLUS_TWO = APP2 ADD ZERO ZERO
