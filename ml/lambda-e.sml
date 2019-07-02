@@ -96,113 +96,15 @@ val COND = ABS3 0 1 2 (APP2 (Var 0) (Var 1) (Var 2))
 val NEG = (ABS 3 (ABS2 1 2 (APP2 (Var 3) (Var 2) (Var 1))))
 val CONJ = (ABS2 0 1 (APP2 (Var 0) (Var 1) FALSE))
 val DISJ = (ABS2 0 1 (APP2 (Var 0) TRUE (Var 1)))
-
-(* val test_exps = [ *)
-(*     (Var 1), *)
-(*     (Var 4), *)
-(*     (ABS 1 (Var 1)), *)
-(*     (ABS 1 (Var 4)), *)
-(*     (ABS 1 (Var 5)), *)
-(*     APP (ABS 0 (Var 0)) (Var 0), *)
-(*     APP (ABS 0 (APP (Var 0) (Var 1))) (ABS 0 (Var 0)), *)
-(*     ABS 0 (APP (Var 0) (Var 1)), *)
-(*     APP (Var 0) (Var 1), *)
-(*     ABS 0 (APP (ABS 3 (Var 3)) (Var 0)), *)
-(*     ABS2 0 1 (APP (ABS 0 (Var 1)) (APP (Var 0) (Var 1))), *)
-(*     ABS2 3 4 (APP (ABS 3 (Var 3)) (APP (Var 3) (Var 4))) *)
-(* ] *)
-
-(* fun test_exp_fn_to_lexp fcn test_exps extra = *)
-(*     let *)
-(*         fun run_test exp = *)
-(*             (print extra; *)
-(*              print "\n"; *)
-(*              lprint exp; *)
-(*              lprint (fcn exp); *)
-(*              print "\n") *)
-(*     in *)
-(*         map run_test test_exps *)
-(*     end *)
-
-(* fun test_exp_fn_to_int fcn test_exps extra = *)
-(*     let *)
-(*         fun run_test exp = *)
-(*             (print extra; *)
-(*              print "\n"; *)
-(*              lprint exp; *)
-(*              print (Int.toString (fcn exp)); *)
-(*              print "\n") *)
-(*     in *)
-(*         map run_test test_exps *)
-(*     end *)
-
-
-(* val test_max_var = test_exp_fn_to_int max_var test_exps "max_var" *)
-
-(* val test_reletter = test_exp_fn_to_lexp *)
-(*                         (fn exp => reletter exp 1 9) *)
-(*                          test_exps *)
-(*                         "reletter all 1's to 9's" *)
-
-
-(* val inc_test1 = test_exp_fn_to_lexp *)
-(*                     (fn exp => inc exp 1) *)
-(*                     test_exps *)
-(*                     "incrementing from 1" *)
-
-(* val inc_test4 = test_exp_fn_to_lexp *)
-(*                     (fn exp => inc exp 4) *)
-(*                     test_exps *)
-(*                     "incrementing from 4" *)
-
-(* val alpha_test1 = *)
-(*     let *)
-(*         val exp2 = (APP2 (Var 0) (ABS 1 (Var 1)) (ABS 3 (Var 3))) *)
-(*     in *)
-(*         test_exp_fn_to_lexp *)
-(*             (fn exp1 => alpha exp1 exp2) *)
-(*              test_exps *)
-(*             ("alpha with " ^ toString(exp2)) *)
-(*     end *)
-        
-
-(* val subst_test1 = *)
-(*     let *)
-(*         val exp2 = (APP2 (Var 9) (ABS 11 (Var 11)) (ABS 12 (Var 12))) *)
-(*     in *)
-(*         test_exp_fn_to_lexp *)
-(*             (fn exp1 => (subst exp1 1 exp2)) *)
-(*             test_exps *)
-(*             ("substituting " ^ (toString exp2) ^ " for 1") *)
-(*     end *)
-
-(* val beta_test_exps = [ *)
-(*     APP (ABS 1 (Var 1)) (Var 2), *)
-(*     APP (ABS2 1 2 (Var 1)) (Var 3), *)
-(*     APP3 COND TRUE (Var 0) (Var 1), *)
-(*     APP3 COND FALSE (Var 0) (Var 1) *)
-(* ] *)
-
-(* val beta_test1 = *)
-(*     test_exp_fn_to_lexp *)
-(*         beta *)
-(*         beta_test_exps *)
-(*         "applying beta" *)
-
                        
 
-(* val cbv0 = eval ( APP (ABS 0 (Var 0)) (Var 0)) *)
-(* val cbv1 = eval ( APP (ABS 0 (APP (Var 0) (Var 1))) (ABS 0 (Var 0))) *)
+(* val cbv0 = eval (APP (ABS 0 (Var 0)) (Var 0)) *)
+(* val cbv1 = eval (APP (ABS 0 (APP (Var 0) (Var 1))) (ABS 0 (Var 0))) *)
 (* val cbv2 = eval (ABS 0 (APP (Var 0) (Var 1))) *)
 (* val cbv3 = eval (APP (Var 0) (Var 1)) *)
 (* val cbv4 = eval (ABS 0 (APP (ABS 3 (Var 3)) (Var 0))) *)
 (* val cbv5 = eval (ABS2 3 4 (APP (ABS 3 (Var 3)) (APP (Var 3) (Var 4)))) *)
 
-
-(* (* the conditional applies its first arg to its second and third args *) *)
-
-(* val FIRST_0_1 = eval (APP2 FIRST (Var 0) (Var 1)) *)
-(* val SECOND_0_1 = eval (APP2 SECOND (Var 0) (Var 1)) *)
 
 
 val CBV_COND_TRUE_88_99 = eval_rel (APP3 COND TRUE (Var 0) (Var 1)) [IntVal 88, IntVal 99]
