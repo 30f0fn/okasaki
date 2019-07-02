@@ -4,109 +4,68 @@ datatype lexp = Var of int
               | Abs of int * lexp
               | App of lexp * lexp
 
-fun toString (Var k) = "(Var " ^ Int.toString(k) ^ ")"
-  | toString (Abs (k, e)) = "(Abs " ^ Int.toString(k) ^ ", " ^ toString(e) ^ ")"
-  | toString (App (e, f)) = "(App " ^ toString(e) ^ ", " ^ toString(f) ^ ")"
+datatype value = Null
+               | IntVal of int
+               | Closure of int * lexp * value list
 
-fun lsize (Var k) = 1
-  | lsize (App (e, f)) = 1 + (lsize e) + (lsize f)
-  | lsize (Abs (k, e)) = 1 + (lsize e)
-
-(* fun toStringSize lexp = String.size (toString lexp) *)
-
-fun lprint lexp = (print(toString(lexp)); print("\n"))
-
-fun max_var (Var k) = k
-  | max_var (Abs (k, e)) = Int.max(k, max_var e)
-  | max_var (App (e1, e2)) = Int.max(max_var e1, max_var e2)
-
-fun next_var exp = (max_var exp) + 1
-
-fun reletter (Var k) l m = if k = l
-                           then Var m
-                           else Var k
-  | reletter (Abs (k, e)) l m = if k = l
-                                then Abs (m, (reletter e l m))
-                                else Abs (k, (reletter e l m))
-  | reletter (App (e, f)) l m = App ((reletter e l m), (reletter f l m))
-
-
-fun inc (Var k) i = Var k
-  | inc (Abs (k, e)) i = reletter (Abs (k, inc e i)) k (k + i)
-  | inc (App (e, f)) i = App (inc e i, inc f i)
-
-
-fun alpha_min exp nexp = Int.max(next_var exp, next_var nexp)
-
-fun alpha exp nexp = inc exp (alpha_min exp nexp)
-
-fun subst (Var k) l exp = if k = l then exp else Var k
-          | subst (Abs (k, e)) l exp = if k = l
-                                       then Abs (k, e)
-                                       else (Abs (k, (subst e l exp)))
-          | subst (App (e, f)) l exp = App ((subst e l exp),
-                                            (subst f l exp))
- 
-
-fun beta (App (Abs(k, e), f)) = beta (subst (alpha e f) k f)
-  | beta a = a
-
-
-fun eval exp =
-    case exp of
-        App (e, f) =>
-        let
-            val ev = eval e
-            val fv = eval f
-        in
-            case ev of
-                Abs _ =>  eval (beta (App (ev, fv)))
-              | _ => App (ev, fv)
-        end
-      | _ => exp
-
-fun eval_extra exp extra_fcn =
-    (extra_fcn exp;
-     case exp of
-         App (e, f) =>
-         let
-             val ev = eval_extra e extra_fcn
-             val fv = eval_extra f extra_fcn
-         in
-             case ev of
-                 Abs _ =>  eval_extra (beta (App (ev, fv))) extra_fcn
-               | _ => App (ev, fv)
-         end
-      | _ => exp
-    )
-
-fun eval_verbosely exp =
+structure Env = struct
+(* type t = value list *)
+val empty = [] : value list
+fun null_vals_list k = if k = 0 then [] else Null :: null_vals_list (k - 1)
+fun extend l k = l @ (null_vals_list k)
+fun extend_to l new_len = extend l (Int.max(0, new_len - length l))
+fun lookup l i = if i < length l then List.nth (l, i) else Null
+fun insert l i v =
     let
-        fun f e = print ("evaluating " ^ (toString e) ^ "\n")
+        val ll = extend_to l (i+1)
     in
-        eval_extra exp f
+        List.take (ll, i) @ v :: List.drop(ll, i + 1)
     end
-
-fun eval_sizecounter exp =
+end
+            
+fun eval_rel (Var (k : int)) env = Env.lookup env k
+  | eval_rel (Abs (k, e)) env = Closure (k, e, env)
+  | eval_rel (App (e, f)) env =
     let
-        (* fun f e = print ("evaluating string of size " ^ (Int.toString (lsize e)) ^ "\n") *)
-        fun f e = print ((Int.toString (max_var e)) ^ " ")
+        val ev = eval_rel e env
+        val fv = eval_rel f env
     in
-        eval_extra exp f
-    end
-    
+        case ev of
+            Closure (k, e1, env1) => 
+            let
+                val env2 = Env.insert env1 k fv
+            in
+                eval_rel e1 env2
+            end
+         | _ => ev
+    end 
+
+fun eval exp = eval_rel exp Env.empty
 
 
 (* (***********) *)
 (* (* TESTING *) *)
 (* (***********) *)
 
+(* val env = [IntVal 8, IntVal 9, IntVal 10] *)
+(* val var_0_in_env_is_8 = eval_rel (Var 0) env *)
+(* val var_1_in_env_is_9 = eval_rel (Var 1) env *)
+(* val var_2_in_env_is_10 = eval_rel (Var 2) env *)
+(* val var_3_in_env_is_neg = eval_rel (Var 3) env *)
+(* val env1 = Env.insert env 3 (IntVal 11) *)
+(* val var_3_in_env1_is_11 = eval_rel (Var 3) env1 *)
+(* val env2 = Env.insert env 99 (IntVal 999) *)
+(* val var_99_in_env2_is_999 = eval_rel (Var 99) env2 *)
+(* val var_0_in_env2_is_8 = eval_rel (Var 0) env *)
+
+
+
 
 
 
 (* (* http://pages.cs.wisc.edu/~horwitz/CS704-NOTES/2.LAMBDA-CALCULUS-PART2.html *) *)
 
-(* (* sugar *) *)
+(* (* (* sugar *) *) *)
 fun APP f e = App (f, e)
 fun APP2 f e1 e2 = App (App (f, e1), e2)
 fun APP3 f e1 e2 e3 = App (App (App (f, e1), e2), e3)
@@ -114,21 +73,29 @@ fun ABS k e = Abs (k, e)
 fun ABS2 k1 k2 e = Abs (k1, Abs (k2, e))
 fun ABS3 k1 k2 k3 e = Abs (k1, Abs (k2, Abs (k3, e)))
 
+val identity_of_99 = eval_rel (APP (ABS 1 (Var 1)) (Var 0)) [IntVal 99]
 
-(* booleans *)
+(* (* booleans *) *)
 val FIRST = Abs (0, Abs (1, Var 0))
 val TRUE = FIRST
 val SECOND = Abs (0, Abs (1, Var 1))
 val FALSE = SECOND
 
+val first_of_88_99 = eval_rel (APP2 FIRST (Var 0) (Var 1)) [IntVal 88, IntVal 99]
+val second_of_88_99 = eval_rel (APP2 SECOND (Var 0) (Var 1)) [IntVal 88, IntVal 99]
+
+val eval_TRUE = eval TRUE
+val identity_of_TRUE = eval (APP (ABS 1 (Var 1)) TRUE)
+val first_of = eval (ABS2 0 1 (Var 0))
+val FIRST_of_TRUE_FALSE_rel = eval_rel (APP2 FIRST (Var 0) (Var 1)) [Closure (0, TRUE, []), Closure(0, TRUE, [])]
+val FIRST_of_TRUE_FALSE = eval (APP2 FIRST TRUE FALSE)
+
+(* (* val SECOND_0_1 = eval (APP2 SECOND (Var 0) (Var 1)) *) *)
+
 val COND = ABS3 0 1 2 (APP2 (Var 0) (Var 1) (Var 2))
 val NEG = (ABS 3 (ABS2 1 2 (APP2 (Var 3) (Var 2) (Var 1))))
 val CONJ = (ABS2 0 1 (APP2 (Var 0) (Var 1) FALSE))
 val DISJ = (ABS2 0 1 (APP2 (Var 0) TRUE (Var 1)))
-
- 
-
-
 
 (* val test_exps = [ *)
 (*     (Var 1), *)
@@ -238,21 +205,21 @@ val DISJ = (ABS2 0 1 (APP2 (Var 0) TRUE (Var 1)))
 (* val SECOND_0_1 = eval (APP2 SECOND (Var 0) (Var 1)) *)
 
 
-val CBV_COND_TRUE_0_1 = eval (APP3 COND TRUE (Var 0) (Var 1))
-val CBV_COND_FALSE_0_1 = eval (APP3 COND FALSE (Var 0) (Var 1))
+val CBV_COND_TRUE_88_99 = eval_rel (APP3 COND TRUE (Var 0) (Var 1)) [IntVal 88, IntVal 99]
+val CBV_COND_FALSE_88_99 = eval_rel (APP3 COND FALSE (Var 0) (Var 1)) [IntVal 88, IntVal 99]
 
 
-(* val NEG = Abs(0, (APP2 (Var 0) FALSE TRUE)) *)
+val NEG = Abs(0, (APP2 (Var 0) FALSE TRUE))
 
-(* (* val REV_TRUE = eval  (ABS2 1 2 (APP2 TRUE (Var 2) (Var 1))) *) *)
-(* (* val REV_FALSE = eval (ABS2 1 2 (APP2 FALSE (Var 2) (Var 1))) *) *)
+(* (* (* val REV_TRUE = eval  (ABS2 1 2 (APP2 TRUE (Var 2) (Var 1))) *) *) *)
+(* (* (* val REV_FALSE = eval (ABS2 1 2 (APP2 FALSE (Var 2) (Var 1))) *) *) *)
 
 val CBV_NEG_TRUE = eval (APP NEG TRUE)
 val CBV_NEG_FALSE = eval (APP NEG FALSE)
 
-(* (* val REV_TRUE_0_1 = eval (APP2 (ABS 1 (ABS 2 (APP (APP TRUE (Var 2)) (Var 1)))) (Var 0)) (Var 1) *) *)
+(* (* (* val REV_TRUE_0_1 = eval (APP2 (ABS 1 (ABS 2 (APP (APP TRUE (Var 2)) (Var 1)))) (Var 0)) (Var 1) *) *) *)
 
-(* (* neg v = lambda 0 1 v rev 0 1 *) *)
+(* (* (* neg v = lambda 0 1 v rev 0 1 *) *) *)
 
 val CBV_CONJ_TRUE_TRUE = eval (APP2 CONJ TRUE TRUE)
 val CBV_CONJ_TRUE_FALSE = eval (APP2 CONJ TRUE FALSE)
@@ -269,7 +236,7 @@ val CBV_DISJ_DUAL_TRUE_TRUE = eval (APP2 CBV_DISJ_DUAL TRUE TRUE)
 val CBV_DISJ_DUAL_TRUE_FALSE = eval (APP2 CBV_DISJ_DUAL TRUE FALSE)
 val CBV_DISJ_DUAL_FALSE_TRUE = eval (APP2 CBV_DISJ_DUAL FALSE TRUE)
 val CBV_DISJ_DUAL_FALSE_FALSE = eval (APP2 CBV_DISJ_DUAL FALSE FALSE)
-(* lists *)
+(* (* lists *) *)
 
 val CONS = ABS2 1 2 (ABS 0 (APP2 (Var 0) (Var 1) (Var 2)))
 (* a list is a function which takes a selector function as arg, and returns the result of applying the selector to the pair head, tail *)
@@ -341,5 +308,5 @@ val REC_FOR_ADD = ABS 2 (
 
 val ADD = APP Y REC_FOR_ADD
 
-(* for some reason this doesn't reduce :( *)
-val ONE_PLUS_TWO = eval_sizecounter (APP2 ADD ONE TWO)
+(* (* for some reason this doesn't reduce :( *) *)
+(* val ONE_PLUS_TWO = eval (APP2 ADD ONE TWO) *)
