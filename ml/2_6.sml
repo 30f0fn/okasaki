@@ -22,16 +22,16 @@ exception NotFound;
 functor UnbalancedFiniteMap (K : ORDERED) : FINITEMAP =
 struct
 type Key = K.T
-datatype 'a MapTree = E | MT of 'a MapTree * (Key * 'a) * 'a MapTree
+datatype 'a MapTree = E | FM of 'a MapTree * (Key * 'a) * 'a MapTree
 type 'a Map = 'a MapTree
 val empty = E
-fun bind (k, v, E) = MT (E, (k, v), E)
-  | bind (k, v, mt as MT(a, (k1, v1), b)) =
-    if K.lt(k, k1) then MT(bind(k, v, a), (k1, v1), b)
-    else if K.lt(k1, k) then MT(a, (k1, v1), bind(k, v, b))
+fun bind (k, v, E) = FM (E, (k, v), E)
+  | bind (k, v, mt as FM(a, (k1, v1), b)) =
+    if K.lt(k, k1) then FM(bind(k, v, a), (k1, v1), b)
+    else if K.lt(k1, k) then FM(a, (k1, v1), bind(k, v, b))
     else mt
 fun lookup (k, E) = raise NotFound
-  | lookup (k, mt as MT (a, (k1, v1), b)) =
+  | lookup (k, mt as FM (a, (k1, v1), b)) =
     if K.lt (k, k1) then lookup (k, a)
     else if K.lt (k1, k) then lookup (k, b)
     else v1
@@ -39,45 +39,61 @@ end
 
 (* TESTS *)
 
-(* structure UnbalancedIntSet = UnbalancedSet (DupInts) *)
+structure DupInts : ORDERED = struct
+type T = int
+fun eq (x,y) = x = y
+fun lt (x,y) = x < y
+fun leq (x,y) = x <= y
+end
 
-(* open UnbalancedIntSet *)
+structure UnbalancedIntMap = UnbalancedFiniteMap (DupInts)
 
-(* val emptySet = UnbalancedIntSet.empty *)
-(* val set_1 = UnbalancedIntSet.insert(1, emptySet) *)
-(* val set_1_2 = UnbalancedIntSet.insert(2, set_1) *)
-(* val set_1_2_3 = UnbalancedIntSet.insert(3, set_1_2) *)
-(* val set_2_1 = UnbalancedIntSet.insert(2, set_1) *)
-(* val set_2_1_3 = UnbalancedIntSet.insert(3, set_1_2) *)
-(* val set_3_2_1 = UnbalancedIntSet.insert(3, set_1_2) *)
+open UnbalancedIntMap
 
-(* val list_1_2_contains_1 = inList 1 [1,2] *)
+val emptyMap = empty
+val map_1 = bind (1, "a", emptyMap)
+val map_1_2 = bind(2, "b", map_1)
+val map_1_2_3 = bind(3, "c", map_1_2)
+val map_2 = bind (2, "b", emptyMap)
+val map_2_1 = bind(1, "a", map_2)
+val map_2_1_3 = bind(3, "c", map_2_1)
+val map_3 = bind(3, "c", emptyMap)
+val map_3_2 = bind(2, "b", map_3)
+val map_3_2_1 = bind(1, "a", map_3_2)
 
-(* val test_emptySet_contains_0 = member (0, emptySet) = true *)
-(* val test_set_1_contains_0 = member (0, set_1) = false *)
-(* val test_set_1_contains_1 = member (1, set_1) = true *)
-(* val test_set_1_contains_2 = member (2, set_1) = false *)
-(* val test_set_1_2_contains_0 = member (0, set_1_2) = false *)
-(* val test_set_1_2_contains_1 = member (1, set_1_2) = true *)
-(* val test_set_1_2_contains_2 = member (2, set_1_2) = true *)
-(* val test_set_1_2_contains_3 = member (3, set_1_2) = false *)
-(* val test_set_2_1_contains_0 = member (0, set_2_1) = false *)
-(* val test_set_2_1_contains_1 = member (1, set_2_1) = true *)
-(* val test_set_2_1_contains_2 = member (2, set_2_1) = true *)
-(* val test_set_2_1_contains_3 = member (3, set_2_1) = false *)
-(* val test_set_1_2_3_contains_0 = member (0, set_1_2_3) = false *)
-(* val test_set_1_2_3_contains_1 = member (1, set_1_2_3) = true *)
-(* val test_set_1_2_3_contains_2 = member (2, set_1_2_3) = true *)
-(* val test_set_1_2_3_contains_3 = member (3, set_1_2_3) = true *)
-(* val test_set_1_2_3_contains_4 = member (0, set_1_2_3) = false *)
-(* val test_set_2_1_3_contains_0 = member (0, set_2_1_3) = false *)
-(* val test_set_2_1_3_contains_1 = member (1, set_2_1_3) = true *)
-(* val test_set_2_1_3_contains_2 = member (2, set_2_1_3) = true *)
-(* val test_set_2_1_3_contains_3 = member (3, set_2_1_3) = true *)
-(* val test_set_2_1_3_contains_4 = member (0, set_2_1_3) = false *)
-(* val test_set_3_2_1_contains_0 = member (0, set_3_2_1) = false *)
-(* val test_set_3_2_1_contains_1 = member (1, set_3_2_1) = true *)
-(* val test_set_3_2_1_contains_2 = member (2, set_3_2_1) = true *)
-(* val test_set_3_2_1_contains_3 = member (3, set_3_2_1) = true *)
-(* val test_set_3_2_1_contains_4 = member (0, set_3_2_1) = false *)
+fun omits (key, map) =
+    let
+        val _ = lookup (key, map)
+    in
+        false
+    end
+    handle NotFound => true
+
+val test_emptyMap_omits_0 = omits (0, emptyMap)
+val test_map_1_omits_0 = omits (0, map_1)
+val test_map_1inds_1 = lookup (1, map_1) = "a"
+val test_map_1_omits_2 = omits (2, map_1)
+val test_map_1_2_omits_0 = omits (0, map_1_2)
+val test_map_1_2_contains_1 = lookup (1, map_1_2) = "a"
+val test_map_1_2_contains_2 = lookup (2, map_1_2) = "b"
+val test_map_1_2_omits_3 = omits (3, map_1_2)
+val test_map_2_1_omits_0 = omits (0, map_2_1)
+val test_map_2_1_contains_1 = lookup (1, map_2_1) = "a"
+val test_map_2_1_contains_2 = lookup (2, map_2_1) = "b"
+val test_map_2_1_omits_3 = omits (3, map_2_1)
+val test_map_1_2_3_omits_0 = omits (0, map_1_2_3)
+val test_map_1_2_3_contains_1 = lookup (1, map_1_2_3) = "a"
+val test_map_1_2_3_contains_2 = lookup (2, map_1_2_3) = "b"
+val test_map_1_2_3_contains_3 = lookup (3, map_1_2_3) = "c"
+val test_map_1_2_3_omits_4 = omits (0, map_1_2_3)
+val test_map_2_1_3_omits_0 = omits (0, map_2_1_3)
+val test_map_2_1_3_contains_1 = lookup (1, map_2_1_3) = "a"
+val test_map_2_1_3_contains_2 = lookup (2, map_2_1_3) = "b"
+val test_map_2_1_3_contains_3 = lookup (3, map_2_1_3) = "c"
+val test_map_2_1_3_omits_4 = omits (0, map_2_1_3)
+val test_map_3_2_1_omits_0 = omits (0, map_3_2_1)
+val test_map_3_2_1_contains_1 = lookup (1, map_3_2_1) = "a"
+val test_map_3_2_1_contains_2 = lookup (2, map_3_2_1) = "b"
+val test_map_3_2_1_contains_3 = lookup (3, map_3_2_1) = "c"
+val test_map_3_2_1_omits_4 = omits (0, map_3_2_1)
 

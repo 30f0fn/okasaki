@@ -70,11 +70,13 @@ val emptySet = UnbalancedIntSet.empty
 val set_1 = UnbalancedIntSet.insert(1, emptySet)
 val set_1_2 = UnbalancedIntSet.insert(2, set_1)
 val set_1_2_3 = UnbalancedIntSet.insert(3, set_1_2)
-val set_2_1 = UnbalancedIntSet.insert(2, set_1)
-val set_2_1_3 = UnbalancedIntSet.insert(3, set_1_2)
-val set_3_2_1 = UnbalancedIntSet.insert(3, set_1_2)
+val set_2 = UnbalancedIntSet.insert(2, emptySet)
+val set_2_1 = UnbalancedIntSet.insert(1, set_2)
+val set_2_1_3 = UnbalancedIntSet.insert(3, set_2_1)
+val set_3 = UnbalancedIntSet.insert(3, emptySet)
+val set_3_2 = UnbalancedIntSet.insert(2, set_3)
+val set_3_2_1 = UnbalancedIntSet.insert(1, set_3_2)
 
-(* val list_1_2_contains_1 = inList 1 [1,2] *)
 
 val test_emptySet_contains_0 = member (0, emptySet) = true
 val test_set_1_contains_0 = member (0, set_1) = false
