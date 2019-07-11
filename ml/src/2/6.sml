@@ -22,5 +22,10 @@ functor UnbalancedFiniteMap (K : ORDERED) : FINITEMAP =
             if K.lt (k, k1) then lookup (k, a)
             else if K.lt (k1, k) then lookup (k, b)
             else v1
+        fun lookup_opt (k, E) = NONE
+          | lookup_opt (k, mt as FM (a, (k1, v1), b)) =
+            if K.lt (k, k1) then lookup_opt (k, a)
+            else if K.lt (k1, k) then lookup_opt (k, b)
+            else SOME v1
     end
 
