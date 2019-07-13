@@ -30,3 +30,4 @@ structure listifyStructure = Listify(HeapStruct)
 val listify = listifyStructure.doIt
 
 val l_merged_listified = listify(l_merged)
+                                
