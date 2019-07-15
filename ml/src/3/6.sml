@@ -1,5 +1,9 @@
 (* Most of the rank annotations in the initial implementation of binomial heaps are redundant because we know that the children of a node of rank r have ranks r - 1, ..., 0.  Thus, we can remove the rank annotations from each node and instead pair each tree at the top-level with its rank.  Do this.  *)
 
+use "../../src/2/ORDERED.sml";
+use "../../src/3/HEAP.sml";
+
+
 
 functor BinomialHeap (Element : ORDERED) : HEAP =
     struct
@@ -24,7 +28,7 @@ functor BinomialHeap (Element : ORDERED) : HEAP =
             else Node (x2, t1 :: c2)
 
         (* inserting a tree into a heap *)
-        fun insTree ((r,t), []) = [(r, t)]
+        fun insTree ((r, t), []) = [(r, t)]
           | insTree ((r, t), ts as (r', t') :: ts') =
             if r < r' 
             then (r, t) :: ts
@@ -84,7 +88,7 @@ functor BinomialHeap (Element : ORDERED) : HEAP =
                 val Node (_, children) = t
                 val rankedChildren = rankChildren (r - 1, children)
             in
-                merge (reverse rankedChildren, h')
+                merge (List.rev rankedChildren, h')
             end
                 
     end

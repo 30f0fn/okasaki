@@ -1,6 +1,9 @@
 Control.Print.printDepth := 100;
 
-use "../../src/3/5.sml";
+use "../../src/3/6.sml";
+
+
+use "../../src/3/7.sml";
 
 (* tests *)
 
@@ -20,7 +23,8 @@ structure DupInts : ORDERED =
         fun leq (x,y) = x <= y
     end
 
-structure IntHeap = BinomialHeap (DupInts)
+structure IntHeap' = BinomialHeap (DupInts)
+structure IntHeap = ExplicitMin (IntHeap')
 
 open IntHeap
 
@@ -116,7 +120,7 @@ val merge_1__4 = merge (h_1, h_4)
 val merge_1_2__4 = merge (h_1_2, h_4)
 val merge_1__5_3 = merge (h_1, h_5_3)
                          
-(* verify that findMin merge h1 h2 returns the minimum of findMin h1 and findMin h2, for everything in a big cartesian product *)
+(* (* verify that findMin merge h1 h2 returns the minimum of findMin h1 and findMin h2, for everything in a big cartesian product *) *)
 
 fun test_merge_one_against_many (h1, nil) = true
   | test_merge_one_against_many (h1, h2 :: t) =
@@ -136,9 +140,10 @@ fun test_merge (nil, l2) = true
   | test_merge (h1 :: t1, l2) =
     test_merge_one_against_many (h1, l2) andalso test_merge (t1, l2)
 
+
 val test_merge_123_345 = test_merge (heaps123, heaps345)
 
-(* test delMin with the resultant heapSort *)
+(* (* test delMin with the resultant heapSort *) *)
 
 fun isSorted nil = true
   | isSorted (_ :: nil) = true
@@ -150,28 +155,28 @@ fun heapify elements = foldl (fn (k, h) => insert (k, h))
                              emptyHeap
                              elements
 
-val bigHeap = heapify intList
+(* val bigHeap = heapify intList *)
 
-fun listify h =
-    let
-        fun aux (h, l) = if isEmpty h
-                         then l
-                         else
-                             aux (deleteMin h, (findMin h) :: l)
-    in
-        aux (h, nil)
-    end
+(* fun listify h = *)
+(*     let *)
+(*         fun aux (h, l) = if isEmpty h *)
+(*                          then l *)
+(*                          else *)
+(*                              aux (deleteMin h, (findMin h) :: l) *)
+(*     in *)
+(*         aux (h, nil) *)
+(*     end *)
 
-fun reverse l =
-    let
-        fun aux (nil, l) = l
-          | aux (h :: t, l) = aux (t, h :: l)
-    in
-        aux (l, nil)
-    end
+(* fun reverse l = *)
+(*     let *)
+(*         fun aux (nil, l) = l *)
+(*           | aux (h :: t, l) = aux (t, h :: l) *)
+(*     in *)
+(*         aux (l, nil) *)
+(*     end *)
 
-fun heapSort l = reverse (listify (heapify l))
+(* fun heapSort l = reverse (listify (heapify l)) *)
 
-val should_be_sorted = heapSort intList
+(* val should_be_sorted = heapSort intList *)
 
-val test_deleteMin = isSorted should_be_sorted
+(* val test_deleteMin = isSorted should_be_sorted *)

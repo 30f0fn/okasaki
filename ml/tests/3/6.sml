@@ -1,6 +1,6 @@
 Control.Print.printDepth := 100;
 
-use "../../src/3/5.sml";
+use "../../src/3/6.sml";
 
 (* tests *)
 
@@ -20,7 +20,7 @@ structure DupInts : ORDERED =
         fun leq (x,y) = x <= y
     end
 
-structure IntHeap = LeftistHeap (DupInts)
+structure IntHeap = BinomialHeap (DupInts)
 
 open IntHeap
 

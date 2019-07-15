@@ -3,8 +3,6 @@ use "../3/HEAP.sml";
 
 exception EmptyHeapException 
 
-val poop = 2
-
 functor LeftistHeap (Element : ORDERED) : HEAP =
     struct
         structure Elem = Element

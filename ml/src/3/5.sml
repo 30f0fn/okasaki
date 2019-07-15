@@ -1,5 +1,8 @@
 (* within BinomiaHeap, define findMin directly rather than via a call to removeMinTree *)
 
+use "../../src/2/ORDERED.sml";
+use "../../src/3/HEAP.sml";
+
 functor BinomialHeap (Element : ORDERED) : HEAP =
     struct
         structure Elem = Element
@@ -78,7 +81,7 @@ functor BinomialHeap (Element : ORDERED) : HEAP =
                 val (t, h') = removeMinTree h
                 val Node (_, _, children) = t
             in
-                merge (reverse children, h')
+                merge (List.rev children, h')
             end
                 
     end

@@ -51,7 +51,12 @@ functor BinomialHeap (Element : ORDERED) : HEAP =
                 if Elem.leq (root t, root t') then (t, ts) else (t', t :: ts')
             end
 
-        fun findMin ts = let val (t, _) = removeMinTree ts in root t end
+        fun findMin ts =
+            let
+                val (t, _) = removeMinTree ts
+            in
+                root t
+            end
 
         (* remove the minimum tree t from H, then return to H the children of t
            note that the reversal of the children-list of a binomial tree is a heap! *)
