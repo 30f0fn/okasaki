@@ -39,6 +39,8 @@ functor ExplicitMin (H : HEAP) : HEAP =
             let
                 val newHeap = H.deleteMin h
             in 
-                NE (H.findMin newHeap, newHeap)
+                if H.isEmpty newHeap
+                then E
+                else NE (H.findMin newHeap, newHeap)
             end
     end

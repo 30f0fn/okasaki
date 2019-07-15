@@ -155,28 +155,20 @@ fun heapify elements = foldl (fn (k, h) => insert (k, h))
                              emptyHeap
                              elements
 
-(* val bigHeap = heapify intList *)
+val bigHeap = heapify intList
 
-(* fun listify h = *)
-(*     let *)
-(*         fun aux (h, l) = if isEmpty h *)
-(*                          then l *)
-(*                          else *)
-(*                              aux (deleteMin h, (findMin h) :: l) *)
-(*     in *)
-(*         aux (h, nil) *)
-(*     end *)
+fun listify h =
+    let
+        fun aux (h, l) = if isEmpty h
+                         then l
+                         else
+                             aux (deleteMin h, (findMin h) :: l)
+    in
+        aux (h, nil)
+    end
 
-(* fun reverse l = *)
-(*     let *)
-(*         fun aux (nil, l) = l *)
-(*           | aux (h :: t, l) = aux (t, h :: l) *)
-(*     in *)
-(*         aux (l, nil) *)
-(*     end *)
+fun heapSort l = List.rev (listify (heapify l))
 
-(* fun heapSort l = reverse (listify (heapify l)) *)
-
-(* val should_be_sorted = heapSort intList *)
+val should_be_sorted = heapSort intList
 
 (* val test_deleteMin = isSorted should_be_sorted *)
