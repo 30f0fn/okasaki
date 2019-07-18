@@ -78,9 +78,3 @@ functor RedBlackSet (Element : ORDERED) : SET =
     end
 
 
-val e = empty;
-val e3 = insert (3, e)
-val e32 = insert (2, e3)
-val e321 = insert (1, e32)
-val e3214 = insert (4, e321)
-val e32145 = insert (5, e3214)
