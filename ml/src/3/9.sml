@@ -1,7 +1,16 @@
-(* Write a function `fromOrdList` of type `Elem list -> Tree` that converts a sorted list with no duplicates into a red-black tree.  The function should run in $O(n)$ time. *)
+(* (* Write a function `fromOrdList` of type `Elem list -> Tree` that converts a sorted list with no duplicates into a red-black tree.  The function should run in $O(n)$ time. *) *)
 
-(* Below approach cheats by converting list to an array. *)
-(* basic idea - build a tree of depth d+1, which contains complete binary tree of depth d, and color a node black iff it has depth <= d.  To build the tree, divide the array in half (skipping the middle entry), recursively build trees from the halves, then build a new tree with middle entry as value of the root. *)
+(* The below approach cheats by converting list to an array. *)
+
+(* The basic idea is to build a tree which is very nearly balanced: if it has depth d > 0, then it contains a complete binary tree of depth d - 1.  To satisfy the red-black condition that all branches have the same number of black nodes, we color red exactly those (leaf) nodes at depth d.  Clearly no red node has a red child, because only leaves are red. *)
+
+(* To construct the tree, begin by converting the list to an array.  Now divide the array in half, except reserving the middle element.  We now construct a new tree whose root value is that middle element, and whose children are the trees recursively constructed from the two halves. *)
+
+(* To enforce the red-black distribution noted above, we begin by calculating the depth of the maximal binary tree the desired tree contains, namely as the floor of the base two log of the array length.  Then proceed from the top down, maintaining the current depth as a parameter, and coloring nodes red just when the current depth exceeds the depth of that maximal binary tree.x *)
+
+(* The number of steps of the recursion is proportional to the length of the array, because each step on a non-null subarray consumes an array element, and a step with null subarray is introduced only by a step on a length-2 subarray.  Furthermore, each step takes constant time. *)
+
+(* It might be possible avoid the initial conversion of the list to an array, by iterating through the list and maintaining the constructed trees in a stack.  However, the naive approach to this would work only for lists of length 2^n - 1, and to fix this it would be necessary to invoke some "non-local" information to determine when a singleton tree should take a null tree as its sibling. *)
 
 
 Control.Print.printDepth := 100;
@@ -19,7 +28,7 @@ functor RedBlackSet (Element : ORDERED) : SETFROMLIST =
 
         type Set = Tree
         val empty = E
-
+ 
         fun member (x, E) = false
           | member (x, T (_, a, y, b)) =
             if Element.lt (x, y) then member (x, a)
@@ -41,7 +50,7 @@ functor RedBlackSet (Element : ORDERED) : SETFROMLIST =
            let
                val ar = Array.fromList l
                val len = Array.length ar
-               val redDepth = floor ((Math.ln (real len + 1.0)) / (Math.ln 2.0))
+               val redDepth = floor ((Math.ln (real len)) / (Math.ln 2.0))
                fun aux (ar, i, 0, _) = E
                  | aux (ar, i, 1, depth) =
                    let
