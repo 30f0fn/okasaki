@@ -14,7 +14,12 @@ structure BatchedDeque : DEQUE =
                 (x :: first, second)
             end
         fun halves l = revTake (((length l) div 2), l)
-        fun check ([], r) = halves r
+        fun check ([], r) =
+            let
+                val (first, second) = halves (rev r)
+            in
+                (first, second)
+            end
           | check (r, []) =
             let
                 val (first, second) = halves r
@@ -32,5 +37,5 @@ structure BatchedDeque : DEQUE =
         fun last (_, []) = raise EMPTY
           | last (_, x :: _) = x
         fun init (_, []) = raise EMPTY
-          | init (f, x :: r) = (f, r)
+          | init (f, x :: r) = check (f, r)
     end
