@@ -1,8 +1,7 @@
 use "../../src/2/ORDERED.sml";
 use "../../src/3/HEAP.sml";
 
-
-functor SplayHeap (Element : ORDERED) : HEAP =
+functor SplayHeap (Element : ORDERED)  =
     struct
         structure Elem = Element
         datatype Heap = E | T of Heap * Elem.T * Heap
