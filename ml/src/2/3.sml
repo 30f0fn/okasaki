@@ -22,7 +22,7 @@ functor UnbalancedSet (Element : ORDERED) : SET =
             in
                 aux t
             end
-            handle AlreadyExists => t
+            handle AlreadyExists => t            
 
         fun member (x, t) =
             let

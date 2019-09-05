@@ -6,30 +6,11 @@ Control.Print.printDepth := 1024;
 use "../3/HEAP.sml";
 use "../3/LeftistHeap.sml";
 
-(* signature TO_HEAP = *)
-(*     sig *)
-(*         structure Elem : ORDERED *)
-(*         type Heap *)
-(*         val doIt : Elem.T -> Heap *)
-(*     end *)
-        
-(* functor ToSingleton (Element : ORDERED) : TO_HEAP = *)
-(*     struct *)
-(*         structure Elem = Element *)
-(*         structure HeapStruct = LeftistHeap(Elem) *)
-(*         type Heap = HeapStruct.Heap *)
-(*         fun doIt e = HeapStruct.insert (e, HeapStruct.empty) *)
-(*     end *)
-
-
-
 signature HEAPLIST_TO_HEAP =
     sig
         structure Heap : HEAP
         val doIt : Heap.Elem.T list -> Heap.Heap
     end
-
-
 
 fun logReduceToSingleton f a nil = []
   | logReduceToSingleton f a (h :: nil) = [f (a, h)]
@@ -39,7 +20,6 @@ fun logReduceToSingleton f a nil = []
     in
         lrfa (f (h1, h2) :: lrfa l)
     end
-
 
 
 functor fromList (heap : HEAP) : HEAPLIST_TO_HEAP =
@@ -186,5 +166,3 @@ functor fromList (heap : HEAP) : HEAPLIST_TO_HEAP =
 (* (* fun mergeSingletonsOf h1 h2 = merge ((singleton h1), (singleton h2)) *) *)
 
 (* (* fun fromList l = logReduce mergeSingletonsOf empty l *) *)
-
-

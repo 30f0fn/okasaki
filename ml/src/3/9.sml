@@ -2,11 +2,11 @@
 
 (* The below approach cheats by converting list to an array. *)
 
-(* The basic idea is to build a tree which is very nearly balanced: if it has depth d > 0, then it contains a complete binary tree of depth d - 1.  To satisfy the red-black condition that all branches have the same number of black nodes, we color red exactly those (leaf) nodes at depth d.  Clearly no red node has a red child, because only leaves are red. *)
+(* The basic idea is to build a tree which is very nearly balanced: if its depth is some d > 0, then it contains a complete binary tree of depth d - 1.  We color red exactly those nodes at the maximal depth d.  In the resulting tree, it's clear that no red node has a red child, because only leaves are red.  Furthermore, all  branches have the same number (to wit, d - 1) of black nodes, because the black nodes are precisely the nodes of the complete binary tree of depth d-1. *)
 
-(* To construct the tree, begin by converting the list to an array.  Now divide the array in half, except reserving the middle element.  We now construct a new tree whose root value is that middle element, and whose children are the trees recursively constructed from the two halves. *)
+(* To construct the tree, begin by converting the list to an array.  Now divide the array in half, leaving out the middle element.  We now construct a new tree whose root value is that middle element, and whose children are the trees recursively constructed from the two halves. *)
 
-(* To enforce the red-black distribution noted above, we begin by calculating the depth of the maximal binary tree the desired tree contains, namely as the floor of the base two log of the array length.  Then proceed from the top down, maintaining the current depth as a parameter, and coloring nodes red just when the current depth exceeds the depth of that maximal binary tree.x *)
+(* To establish the red-black distribution noted above, we begin by calculating the depth of the maximal binary tree the desired tree will contain, namely as the floor of the base two log of the array length.  Then proceed from the top down, maintaining the current depth as a parameter, and coloring nodes red just when the current depth exceeds the depth of that maximal binary tree.x *)
 
 (* The number of steps of the recursion is proportional to the length of the array, because each step on a non-null subarray consumes an array element, and a step with null subarray is introduced only by a step on a length-2 subarray.  Furthermore, each step takes constant time. *)
 

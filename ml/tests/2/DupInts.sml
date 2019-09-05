@@ -1,3 +1,5 @@
+use "../../src/2/ORDERED.sml";
+
 structure DupInts : ORDERED =
     struct
         type T = int

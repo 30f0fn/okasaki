@@ -61,15 +61,15 @@ functor RedBlackSet (Element : ORDERED) : SET =
                       | (Eq, _, _) => s
                       | (Lt _, No, _) => T (clrS, T (Red, E, x, E), y, b)
                       | (Lt _, Eq, _) => s
-                      | (Lt _, Lt(clrA, aa, ya, ab), _) =>
+                      | (Lt _, Lt (clrA, aa, ya, ab), _) =>
                         llbalance (clrS, T (clrA, ins aa, ya, ab), y, b)
-                      | (Lt _, Gt(clrA, aa, ya, ab), _) =>
+                      | (Lt _, Gt (clrA, aa, ya, ab), _) =>
                         lrbalance (clrS, T (clrA, aa, ya, ins ab), y, b)
                       | (Gt _, _, No) => T (clrS, a, y, T (Red, E, x, E))
                       | (Gt _, _, Eq) => s
-                      | (Gt _, _, Lt(clrB, ba, by, bb))
+                      | (Gt _, _, Lt (clrB, ba, by, bb))
                         => rlbalance (clrS, a, y, T(clrB, ins ba, by, bb))
-                      | (Gt _, _, Gt(clrB, ba, by, bb))
+                      | (Gt _, _, Gt (clrB, ba, by, bb))
                         => rrbalance (clrS, a, y, T(clrB, ba, by, ins bb))
                 val T (_, a, y, b) = ins s
             in
