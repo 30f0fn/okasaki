@@ -1,6 +1,11 @@
 (*
 3849
-convert multiway trees to binary trees.  convert each multiway node m into a binary node whose left child represents the leftmost child of m, and whose right child represents the sibling to the immediate right of m.  If either would-be children are missing, the corresponding child field is empty.  (So the right child of the root is always empty.)  This gives half-ordered binary trees where no element exceeds any element of its left subtree.
+convert multiway trees to binary trees.  
+convert each multiway node m into a binary node whose left child represents the leftmost child of m, 
+and whose right child represents the sibling to the immediate right of m.  
+If either would-be children are missing, the corresponding child field is empty.  
+(So the right child of the root is always empty.)  
+This gives half-ordered binary trees where no element exceeds any element of its left subtree.
 
 8a) Write a function toBinary which convert pairing heaps from existing representation into 
 datatype BinTree = E' | T' of Elem.T * BinTree * BinTree
